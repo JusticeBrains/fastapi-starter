@@ -1,12 +1,14 @@
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlmodel.ext.asyncio.session import AsyncSession
-
+from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 from config.auth import get_current_user
 from config.session import get_session
-from models.user.user import User
+from models.user.user import RevokedToken, User
 from schemas.base import Token
 from schemas.user.user import UserLogin
 from services.user.user import UserService
+
+security = HTTPBearer()
 
 router = APIRouter(prefix="/auth", tags=["/auth"])
 
@@ -32,3 +34,17 @@ async def me(current_user: User = Depends(get_current_user)):
         "username": current_user.username,
         "email": current_user.email,
     }
+
+
+@router.post("/logout")
+async def logout(
+    credentials: HTTPAuthorizationCredentials = Depends(security),
+    session: AsyncSession = Depends(get_session),
+):
+    token = credentials.credentials
+
+    revoked = RevokedToken(token=token)
+    session.add(revoked)
+    await session.commit()
+
+    return {"detail": "Logged out successfully"}

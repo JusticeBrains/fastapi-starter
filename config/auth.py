@@ -10,7 +10,7 @@ import jwt
 from passlib.context import CryptContext
 
 from config.session import get_session
-from models.user.user import User
+from models.user.user import RevokedToken, User
 
 rate_limiter = RateLimiter()
 user_identifier = UserIdentifer()
@@ -69,6 +69,16 @@ async def get_current_user(
     request: Request = None,
 ):
     token = credentials.credentials
+    revoked = await session.exec(
+        select(RevokedToken).where(RevokedToken.token == token)
+    )
+    revoked = revoked.one_or_none()
+    if revoked:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Invalid authentication credentials",
+        )
+
     if rate_limiter.is_rate_limited(token):
         raise HTTPException(
             status_code=status.HTTP_429_TOO_MANY_REQUESTS, detail="Too many requests"

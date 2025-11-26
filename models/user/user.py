@@ -30,3 +30,11 @@ class User(SQLModel, table=True):
     def get_username(data):
         ext = str(random())[2:5]
         return f"{data.firstname[:3].lower()}{data.lastname[1:3].lower()}{ext}"
+
+
+class RevokedToken(SQLModel, table=True):
+    id: UUID = Field(default_factory=uuid4, primary_key=True)
+    token: str = Field(
+        sa_column=Column(String(255), nullable=False, index=True, unique=True)
+    )
+    revoked_at: datetime = Field(default_factory=datetime.now)
