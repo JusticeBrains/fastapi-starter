@@ -1,0 +1,22 @@
+[project]
+name = "fastapi-starter"
+version = "0.1.0"
+description = "Add your description here"
+readme = "README.md"
+requires-python = ">=3.13"
+dependencies = [
+    "aiosqlite>=0.21.0",
+    "alembic>=1.17.2",
+    "argon2-cffi>=25.1.0",
+    "asyncpg>=0.31.0",
+    "bcrypt>=5.0.0",
+    "environs>=14.5.0",
+    "fastapi[standard]>=0.122.0",
+    "greenlet>=3.2.4",
+    "passlib>=1.7.4",
+    "psycopg2>=2.9.11",
+    "pyjwt>=2.10.1",
+    "ruff>=0.14.6",
+    "sqlmodel>=0.0.27",
+    "ua-parser[regex]>=1.0.1",
+]
