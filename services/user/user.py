@@ -3,7 +3,7 @@ from sqlmodel import select
 from sqlmodel.ext.asyncio.session import AsyncSession
 
 from config.auth import Auth
-from models.user.user import User
+from models.user.user import RevokedToken, User
 from schemas.base import Token
 from schemas.user.user import UserCreate, UserLogin
 
@@ -24,8 +24,8 @@ class UserService:
                 "fullname": fullname,
                 "password": hashed_password,
                 "is_active": data.is_active,
-                "is_password_changed": data.is_password_changed,
-                "is_password_reset": data.is_password_reset,
+                "is_password_changed": False,
+                "is_password_reset": False,
             },
         )
 
@@ -63,7 +63,20 @@ class UserService:
         return Token(access_token=access_token, refresh_token=refresh_token)
 
     @staticmethod
-    async def refresh_access_token(refresh_token: str, session: AsyncSession)-> Token:
+    async def logout(token: str, session: AsyncSession):
+        if not token:
+            raise HTTPException(
+                status_code=status.HTTP_401_UNAUTHORIZED,
+                detail="Invalid or expired token",
+                headers={"WWW-Authenticate": "Bearer"},
+            )
+        revoked = RevokedToken(token)
+        session.add(revoked)
+        await session.commit()
+        return {"detail": "Logged out successfully"}
+
+    @staticmethod
+    async def refresh_access_token(refresh_token: str, session: AsyncSession) -> Token:
         user_id = await auth.verify_token(token=refresh_token)
 
         if not user_id:

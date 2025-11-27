@@ -43,8 +43,4 @@ async def logout(
 ):
     token = credentials.credentials
 
-    revoked = RevokedToken(token=token)
-    session.add(revoked)
-    await session.commit()
-
-    return {"detail": "Logged out successfully"}
+    return await UserService.logout(token=token, session=session)
