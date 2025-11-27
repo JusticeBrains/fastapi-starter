@@ -23,7 +23,10 @@ class Auth:
         self.pwd_context = CryptContext(schemes=["argon2", "bcrypt"], deprecated="auto")
 
     async def verify_password(self, plain_password: str, hashed_password: str) -> bool:
-        return self.pwd_context.verify(plain_password, hashed_password)
+        verify = self.pwd_context.verify(plain_password, hashed_password)
+        if self.pwd_context.needs_update(hashed_password):
+            hashed_password = self.pwd_context.hash(plain_password)
+        return verify
 
     async def get_password_hash(self, password: str) -> str:
         return self.pwd_context.hash(password)
@@ -79,7 +82,7 @@ async def get_current_user(
             detail="Invalid authentication credentials",
         )
 
-    if rate_limiter.is_rate_limited(token):
+    if await rate_limiter.is_rate_limited(token):
         raise HTTPException(
             status_code=status.HTTP_429_TOO_MANY_REQUESTS, detail="Too many requests"
         )
@@ -98,8 +101,8 @@ async def get_current_user(
             detail="Invalid authentication credentials",
         )
 
-    ip_address = user_identifier.get_client_ip(request=request)
-    device_info = user_identifier.get_user_device(request=request)
-    user_identifier.user_activity(user.username, ip_address, device_info)
+    ip_address = await user_identifier.get_client_ip(request=request)
+    device_info = await user_identifier.get_user_device(request=request)
+    await user_identifier.user_activity(user.username, ip_address, device_info)
 
     return user
