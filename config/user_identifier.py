@@ -9,13 +9,13 @@ class UserIdentifer:
     def __init__(self):
         self.user_info = defaultdict(list)
 
-    def get_client_ip(self, request: Request):
+    async def get_client_ip(self, request: Request):
         forwarded = request.headers.get("X-Forwarded-For")
         if forwarded:
             return forwarded.split(",")[0].strip()
         return request.client.host if request.client else "unknown"
 
-    def get_user_device(self, request: Request):
+    async def get_user_device(self, request: Request):
         user_agent = request.headers.get("User-Agent", "unknown")
         ua = Parse(user_agent)
         browser = ua["user_agent"]["family"]
@@ -23,7 +23,7 @@ class UserIdentifer:
         device = ua["device"]["family"]
         return f"{browser} on {os} ({device})"
 
-    def user_activity(self, username: str, ip: str, device: str):
+    async def user_activity(self, username: str, ip: str, device: str):
         current_time = datetime.now()
         activity = {
             "username": username,

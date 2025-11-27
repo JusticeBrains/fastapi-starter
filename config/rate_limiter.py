@@ -8,7 +8,7 @@ class RateLimiter:
         self.request_per_minute = request_per_minute
         self.requests = defaultdict(list)
 
-    def is_rate_limited(self, token: str) -> bool:
+    async def is_rate_limited(self, token: str) -> bool:
         now = datetime.now()
         minutes_ago = now - timedelta(minutes=1)
 
