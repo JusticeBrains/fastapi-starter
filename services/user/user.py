@@ -1,3 +1,4 @@
+from datetime import datetime
 from fastapi import HTTPException, status
 from sqlmodel import select
 from sqlmodel.ext.asyncio.session import AsyncSession
@@ -70,7 +71,7 @@ class UserService:
                 detail="Invalid or expired token",
                 headers={"WWW-Authenticate": "Bearer"},
             )
-        revoked = RevokedToken(token)
+        revoked = RevokedToken(token=token, revoked_at=datetime.now())
         session.add(revoked)
         await session.commit()
         return {"detail": "Logged out successfully"}
