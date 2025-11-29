@@ -6,7 +6,7 @@ from config.session import get_session
 from models.user.user import RevokedToken, User
 from schemas.base import Token
 from schemas.user.user import UserLogin
-from services.user.user import UserService
+from services.user.auth import AuthService
 
 security = HTTPBearer()
 
@@ -15,14 +15,14 @@ router = APIRouter(prefix="/auth", tags=["/auth"])
 
 @router.post("/login", response_model=Token, status_code=status.HTTP_201_CREATED)
 async def login(data: UserLogin, session: AsyncSession = Depends(get_session)):
-    return await UserService.login(data=data, session=session)
+    return await AuthService.login(data=data, session=session)
 
 
 @router.post("/refresh", response_model=Token)
 async def refresh_access_token(
     refresh_token: str, session: AsyncSession = Depends(get_session)
 ):
-    return await UserService.refresh_access_token(
+    return await AuthService.refresh_access_token(
         refresh_token=refresh_token, session=session
     )
 
@@ -43,4 +43,4 @@ async def logout(
 ):
     token = credentials.credentials
 
-    return await UserService.logout(token=token, session=session)
+    return await AuthService.logout(token=token, session=session)
